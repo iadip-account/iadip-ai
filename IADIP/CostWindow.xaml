@@ -1,0 +1,19 @@
+﻿<Window x:Class="IADIP.CostWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Расчет цены аппартамента" Height="300" Width="300">
+    <Grid>
+        <StackPanel>
+            <Label Content="Введите желаемую площадь" />
+            <TextBox Margin="5"/>
+            <Label Content="Введите желаемое количество ванных комнат" />
+            <TextBox Margin="5"/>
+            <Label Content="Введите желаемое расстояние до пляжа" />
+            <TextBox Margin="5"/>
+            <Button Content="Рассчитать" Margin="5"/>
+            <Label Content="Цена аппартамента" />
+            <TextBlock Margin="5" Background="WhiteSmoke" Height="30"/>
+        </StackPanel>
+
+    </Grid>
+</Window>

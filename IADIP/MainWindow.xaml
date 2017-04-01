@@ -1,0 +1,14 @@
+﻿<Window x:Class="IADIP.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Калькулятор цены аппартамента" Height="350" Width="525">
+    <Grid>
+        <StackPanel>
+            <StackPanel Height="60" Orientation="Horizontal">
+                <Button Margin="10,5,10,5" Width="100" Content="Обучение" Click="Button_Click"/>
+                <Button Margin="10,5,10,5" Width="100" Content="Расчет" Click="Button_Click_1"/>
+            </StackPanel>
+            <TextBlock Margin ="10" TextWrapping="Wrap" Text="Данное ПО осуществляет расчет цена аппартамента, вступающего на рынок, на основе модели, полученной в результате обучения нейронной сети. Работу выполнили студентки группы ИСЭмд-11: Савенкова Елизавета, Золотова Ксения, студентка группы ПИмд-11 Фирулина Мария."/>
+        </StackPanel>
+    </Grid>
+</Window>

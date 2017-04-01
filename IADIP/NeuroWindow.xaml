@@ -1,0 +1,35 @@
+﻿<Window x:Class="IADIP.NeuroWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Обучение нейронной сети" Height="488.806" Width="525">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="277*"/>
+            <ColumnDefinition Width="240*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel >
+            <Label Content="Выберите папку с входными файлами"/>
+            <TextBox Margin="5,0" Text="{Binding Path, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Content="Обзор" Margin="5"/>
+            <Button Content="Считать и обработать данные" Margin="5, 30"/>
+            <Label Content="Введите скорость обучения"/>
+            <TextBox Margin="5,0" Text="{Binding Speed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Content="Введите количество нейронов в скрытых слоях"/>
+            <Label Content="(через запятую)" Margin="0,-10,0,0"/>
+            <TextBox Margin="5,0" Text="{Binding Layers, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Content="Максимальное количество итераций" />
+            <TextBox Margin="5,0" Text="{Binding Maximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Content="Количество итераций стабилизации" />
+            <TextBox Margin="5,0" Text="{Binding Iterations, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Content="Доля тестовых примеров из выборки" />
+            <TextBox Margin="5,0" Text="{Binding Tests, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Content="Обучить нейронную сеть" Margin="5"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1">
+            <Label Content="Ход обучения"/>
+            <TextBlock Background="WhiteSmoke" Margin="5" Height="213"/>
+            <Label Content="Качество обучения" />
+            <TextBlock Background="WhiteSmoke" Margin="5" Height="20"/>
+        </StackPanel>
+    </Grid>
+</Window>
