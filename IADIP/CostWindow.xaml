@@ -5,15 +5,15 @@
     <Grid>
         <StackPanel>
             <Label Content="Введите желаемую площадь" />
-            <TextBox Margin="5"/>
+            <TextBox Margin="5" Text="{Binding Area, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <Label Content="Введите желаемое количество ванных комнат" />
-            <TextBox Margin="5"/>
+            <TextBox Margin="5" Text="{Binding Bathes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <Label Content="Введите желаемое расстояние до пляжа" />
-            <TextBox Margin="5"/>
+            <TextBox Margin="5" Text="{Binding Beech, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <Button Content="Рассчитать" Margin="5"/>
             <Label Content="Цена аппартамента" />
-            <TextBlock Margin="5" Background="WhiteSmoke" Height="30"/>
+            <TextBlock Margin="5" Background="WhiteSmoke" Height="30"
+                       Text="{Binding Cost, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
-
     </Grid>
 </Window>
