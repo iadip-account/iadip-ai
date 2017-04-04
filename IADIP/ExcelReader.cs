@@ -9,16 +9,16 @@ namespace IADIP {
         string[] pathes;
 
         public ExcelReader(string[] pathes) {
-            this.pathes = pathes;
+            this.pathes = pathesSort(pathes);
         }
 
-        const int NUMBER = 8;
-        const int SPACE = 1;
-        const int BATHES = 3;
-        const int BEECH = 4;
-        const int COST = 0;
-        const int CITY = 0;
-        const int FIRM = 0;
+        const int NUMBER = 9;
+        const int SPACE = 2;
+        const int BATHES = 4;
+        const int BEECH = 5;
+        const int COST = 1;
+        const int CITY = 6;
+        const int FIRM = 8;
 
         public List<Flat> getAll() {
             IPreprocessing preprocessing = new PreprocessingFindSolded();
@@ -36,11 +36,15 @@ namespace IADIP {
                 Excel.Worksheet objSheet = (Excel.Worksheet)objBook.Sheets[1];
                 var lastRow = objSheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell).Row;
 
-                object[,] array = (object[,])objSheet.Range["A2:I" + lastRow.ToString()].Value;
+                object[,] array = (object[,])objSheet.Range["A1:I" + lastRow.ToString()].Value;
 
                 List<Flat> currFlats = new List<Flat>();
 
                 for (int i = 1; i < array.GetLength(0); i++) {
+
+                    if (!isFill(array[i, SPACE])) continue;
+                    if (isHat(array[i, SPACE])) continue;
+
                     Flat flat = new Flat(
                         convertToInt(array[i, NUMBER]),
                         convertToDouble(array[i, SPACE]),
@@ -50,10 +54,12 @@ namespace IADIP {
                         convertToString(array[i, CITY]),
                         convertToString(array[i, FIRM])
                         );
+                    flat.Baths = convertToDouble(array[i, BATHES]);
                     currFlats.Add(flat);
                     
                 }
                 arrays.Add(new FlatList(currFlats));
+                objExcel.Quit();
             }
             return arrays;
         }
@@ -70,6 +76,30 @@ namespace IADIP {
 
         private string convertToString(object value) {
             return (value != null) ? value.ToString() : string.Empty;
+        }
+
+        private bool isFill(object space) {
+            return space != null;
+        }
+
+        private bool isHat(object space) {
+            double temp = -1;
+            return !Double.TryParse(space.ToString(), out temp);
+        }
+
+        private string[] pathesSort(string[] array) {
+            bool flag = true;
+            while (flag) {
+                flag = false;
+                for (int i = 0; i < array.Length - 1; ++i)
+                    if (array[i].CompareTo(array[i + 1]) > 0) {
+                        string buf = array[i];
+                        array[i] = array[i + 1];
+                        array[i + 1] = buf;
+                        flag = true;
+                    }
+            }
+            return array;
         }
     }
 }
