@@ -3,8 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -38,27 +40,19 @@ namespace IADIP {
             System.Windows.MessageBox.Show("Данные загружены");
         }
 
-        private void Train_Click(object sender, RoutedEventArgs e) {
+        private async void Train_Click(object sender, RoutedEventArgs e) {
             if (!parseLayers()) {
                 System.Windows.MessageBox.Show("Неверный ввод скрытых слоев");
                 return;
             }
 
-            speed = mvm.Speed;
-            maximum = mvm.Maximum;
-            tests = mvm.Tests;
-
-            flats = mvm.flats;
-            if (flats == null) {
+            if (mvm.flats == null) {
                 System.Windows.MessageBox.Show("Данные не загружены!");
                 return;
             }
 
             NET = new NeuralNW(3, layersMas);
-
-            Thread thread = new Thread(Train);
-            thread.Start();
-            NET.SaveNW("Neuro.nw");
+            await Train();
         }
 
         private bool parseLayers() {
@@ -80,21 +74,16 @@ namespace IADIP {
             return true;
         }
 
-        double speed;
-        int maximum;
-        List<Flat> flats;
-        double tests;
 
         private void Train(List<Flat> flats) {
             double kErr = 1E256;
             int k = 0;
-            double kLern = speed;
+            double kLern = mvm.Speed;
 
             double[] X = new double[3];
             double[] Y = new double[1];
 
-
-            while (k < maximum) {
+            while (k < mvm.Maximum) {
                 kErr = 0;
 
                 foreach (Flat flat in flats) {
@@ -103,11 +92,9 @@ namespace IADIP {
                     X[0] = flat.Beech;
                     Y[0] = flat.Cost;
                     kErr += NET.LernNW(X, Y, kLern);
-                    Action action = () => mvm.Training = "Текущая ошибка: " + Convert.ToString(kErr) + "\r\n" + mvm.Training;
-                    Dispatcher.BeginInvoke(action);
+                    mvm.Training = "Текущая ошибка: " + Convert.ToString(kErr) + "\r\n" + mvm.Training;
                 }
-                Action action1 = () => mvm.Training = "Выполнена " + (k + 1).ToString() + " итерация обучения" + "\r\n" + mvm.Training;
-                Dispatcher.BeginInvoke(action1);
+                mvm.Training = "Выполнена " + (k + 1).ToString() + " итерация обучения" + "\r\n" + mvm.Training;
                 k++;
             }
         }
@@ -124,20 +111,20 @@ namespace IADIP {
                 NET.NetOUT(X, out Y);
                 sum += Math.Abs(flat.Cost - Y[0]) / flat.Cost;
             }
-            Action action = () => mvm.Error = sum / flats.Count * 100;
-            Dispatcher.BeginInvoke(action);
+            mvm.Error = sum / flats.Count * 100;
         }
 
-        public void Train() {
+        public async Task Train() {
             INormalize norm = new NormalizeByDisplacement();
-            norm.normalize(flats);
-            int test = (int)(flats.Count * tests / 100);
+            norm.normalize(mvm.flats);
+            int test = (int)(mvm.flats.Count * mvm.Tests / 100);
             Random rnd = new Random();
-            int ind = rnd.Next(flats.Count - test);
-            List<Flat> testList = flats.GetRange(ind, test);
-            List<Flat> trainList = flats.GetRange(0, ind).Concat(flats.GetRange(ind + test, flats.Count - ind - test)).ToList();
-            Train(trainList);
+            int ind = rnd.Next(mvm.flats.Count - test);
+            List<Flat> testList = mvm.flats.GetRange(ind, test);
+            List<Flat> trainList = mvm.flats.GetRange(0, ind).Concat(mvm.flats.GetRange(ind + test, mvm.flats.Count - ind - test)).ToList();
+            await Task.Run(() => Train(mvm.flats));
             Testing(testList);
+            NET.SaveNW("Neuro.nw");
         }
     }
 }

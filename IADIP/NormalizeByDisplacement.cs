@@ -45,13 +45,17 @@ namespace IADIP {
             Properties.Settings.Default.minBaths = minBathes;
             Properties.Settings.Default.maxBeech = maxBeech;
             Properties.Settings.Default.minBeech = minBeech;
-            Properties.Settings.Default.minCost = maxCost;
-            Properties.Settings.Default.maxCost = minCost;
+            Properties.Settings.Default.minCost = minCost;
+            Properties.Settings.Default.maxCost = maxCost;
             Properties.Settings.Default.Save();
         }
 
-        private double displacement(double value, double min, double max) {
+        public static double displacement(double value, double min, double max) {
             return (value - min) * (B - A) / (max - min) + A;
+        }
+
+        public static double deDisplacement(double value, double min, double max) {
+            return (value - A) * (max - min) / (B - A) + min;
         }
 
         private void normalizeSpace(Flat flat, double min, double max) {
