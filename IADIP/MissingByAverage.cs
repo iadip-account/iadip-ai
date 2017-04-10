@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Collections.Generic;
 
 namespace IADIP {
     public class MissingByAverage : IMissing {
@@ -31,7 +30,7 @@ namespace IADIP {
             List<Flat> tempListNotNull = item.Value.Where(q => q.Space != -1).ToList();
             double average = tempListNotNull.Sum(q => q.Space) / tempListNotNull.Count;
             foreach (Flat flat in tempList) {
-                flat.Space = average;
+                flat.Space = Math.Round(average, 3);
             }
         }
 
@@ -40,7 +39,7 @@ namespace IADIP {
             List<Flat> tempListNotNull = item.Value.Where(q => q.Baths != -1).ToList();
             double average = tempListNotNull.Sum(q => q.Baths) / tempListNotNull.Count;
             foreach (Flat flat in tempList) {
-                flat.Baths = average;
+                flat.Baths = Math.Round(average, 3);
             }
         }
 
@@ -49,7 +48,7 @@ namespace IADIP {
             List<Flat> tempListNotNull = item.Value.Where(q => q.Beech != -1).ToList();
             double average = tempListNotNull.Sum(q => q.Beech) / tempListNotNull.Count;
             foreach (Flat flat in tempList) {
-                flat.Beech = average;
+                flat.Beech = Math.Round(average, 3);
             }
         }
 
@@ -58,7 +57,7 @@ namespace IADIP {
             List<Flat> tempListNotNull = item.Value.Where(q => q.Cost != -1).ToList();
             double average = tempListNotNull.Sum(q => q.Cost) / tempListNotNull.Count;
             foreach (Flat flat in tempList) {
-                flat.Cost = average;
+                flat.Cost = Math.Round(average, 3);
             }
         }
     }

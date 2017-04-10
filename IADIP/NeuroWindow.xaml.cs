@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
-
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +16,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Xml.Serialization;
 
 namespace IADIP {
     public partial class NeuroWindow : Window {
@@ -41,18 +42,22 @@ namespace IADIP {
         }
 
         private async void Train_Click(object sender, RoutedEventArgs e) {
-            if (!parseLayers()) {
-                System.Windows.MessageBox.Show("Неверный ввод скрытых слоев");
-                return;
-            }
+            try {
+                if (!parseLayers()) {
+                    System.Windows.MessageBox.Show("Неверный ввод скрытых слоев");
+                    return;
+                }
 
-            if (mvm.flats == null) {
-                System.Windows.MessageBox.Show("Данные не загружены!");
-                return;
-            }
+                if (mvm.Flats == null) {
+                    System.Windows.MessageBox.Show("Данные не загружены!");
+                    return;
+                }
 
-            NET = new NeuralNW(3, layersMas);
-            await Train();
+                NET = new NeuralNW(3, layersMas);
+                await Train();
+            } catch {
+                System.Windows.MessageBox.Show("Ршибка ввода");
+            }
         }
 
         private bool parseLayers() {
@@ -83,7 +88,7 @@ namespace IADIP {
             double[] X = new double[3];
             double[] Y = new double[1];
 
-            while (k < mvm.Maximum) {
+            while (k < mvm.Maximum && kErr > mvm.Goal) {
                 kErr = 0;
 
                 foreach (Flat flat in flats) {
@@ -92,9 +97,10 @@ namespace IADIP {
                     X[0] = flat.Beech;
                     Y[0] = flat.Cost;
                     kErr += NET.LernNW(X, Y, kLern);
-                    mvm.Training = "Текущая ошибка: " + Convert.ToString(kErr) + "\r\n" + mvm.Training;
                 }
-                mvm.Training = "Выполнена " + (k + 1).ToString() + " итерация обучения" + "\r\n" + mvm.Training;
+                if (k % 100 == 0) {
+                    mvm.Training = "Выполнена " + (k + 1).ToString() + " итерация обучения (Текущая ошибка: " + Convert.ToString(kErr) + ")";
+                }
                 k++;
             }
         }
@@ -114,17 +120,44 @@ namespace IADIP {
             mvm.Error = sum / flats.Count * 100;
         }
 
+        bool normalize = false;
         public async Task Train() {
-            INormalize norm = new NormalizeByDisplacement();
-            norm.normalize(mvm.flats);
-            int test = (int)(mvm.flats.Count * mvm.Tests / 100);
-            Random rnd = new Random();
-            int ind = rnd.Next(mvm.flats.Count - test);
-            List<Flat> testList = mvm.flats.GetRange(ind, test);
-            List<Flat> trainList = mvm.flats.GetRange(0, ind).Concat(mvm.flats.GetRange(ind + test, mvm.flats.Count - ind - test)).ToList();
-            await Task.Run(() => Train(mvm.flats));
-            Testing(testList);
-            NET.SaveNW("Neuro.nw");
+            if (mvm.Segment != null) {
+                if (mvm.Segments.Where(q => q.Name == mvm.Segment.Name).ToList().Count > 1) {
+                    System.Windows.MessageBox.Show("Названия сегментов не должны повторяться!");
+                    return;
+                }
+                if (normalize == false) {
+                    INormalize norm = new NormalizeByDisplacement();
+                    mvm.flatsNormalize = norm.normalize(mvm.Flats);
+                    normalize = true;
+                }
+                int test = (int)(mvm.flatsNormalize.Count * mvm.Tests / 100);
+                Random rnd = new Random();
+                int ind = rnd.Next(mvm.flatsNormalize.Count - test);
+                List<Flat> testList = mvm.flatsNormalize.GetRange(ind, test);
+                List<Flat> trainList = mvm.flatsNormalize.GetRange(0, ind)
+                    .Concat(mvm.flatsNormalize.GetRange(ind + test, mvm.flatsNormalize.Count - ind - test))
+                    .ToList();
+                await Task.Run(() => Train(mvm.flatsNormalize));
+                Testing(testList);
+                NET.SaveNW(mvm.Segment.Name + ".nw");
+            } else {
+                System.Windows.MessageBox.Show("Выберите сегмент!");
+                return;
+            }
         }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e) {
+            mvm.Segments.Add(new Segment());
+            mvm.CollectionSegments.Refresh();
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e) {
+            XmlSerializer serialize = new XmlSerializer(typeof(List<Segment>));
+            serialize.Serialize(new StreamWriter("segments.xml"), mvm.Segments);
+        }
+
+
     }
 }

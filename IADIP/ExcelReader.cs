@@ -23,7 +23,9 @@ namespace IADIP {
         public List<Flat> getAll() {
             IPreprocessing preprocessing = new PreprocessingFindSolded();
             IMissing missing = new MissingByAverage();
+            FindEquals findEquals = new FindEquals();
             List<Flat> flats = preprocessing.preprocess(arraysRawData());
+            findEquals.preprocess(flats);
             missing.fillMissingValues(flats);
             return flats;
         }
@@ -42,7 +44,7 @@ namespace IADIP {
 
                 for (int i = 1; i < array.GetLength(0); i++) {
 
-                    if (!isFill(array[i, SPACE])) continue;
+                    if (!isFill(array[i, SPACE], array[i, NUMBER])) continue;
                     if (isHat(array[i, SPACE])) continue;
 
                     Flat flat = new Flat(
@@ -78,8 +80,8 @@ namespace IADIP {
             return (value != null) ? value.ToString() : string.Empty;
         }
 
-        private bool isFill(object space) {
-            return space != null;
+        private bool isFill(object space, object number) {
+            return space != null && number != null;
         }
 
         private bool isHat(object space) {

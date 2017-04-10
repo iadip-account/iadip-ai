@@ -14,15 +14,16 @@ namespace IADIP {
                 foreach (var flat in array.Flats) {
                     bool sold = false;
                     for (int i = k; i < arrays.Count; i++) {
-                        if (arrays[i].Flats.Where(q => q.Number == flat.Number).FirstOrDefault() == null) {
+                        if (arrays[i].Flats.Where(q => q.Number == flat.Number && q.Firm == flat.Firm).FirstOrDefault() == null) {
                             sold = true;
                             break;
                         } else {
-                            arrays[i].Flats.RemoveAll(q => q.Number == flat.Number);
+                            arrays[i].Flats.RemoveAll(q => q.Number == flat.Number && q.Firm == flat.Firm);
                         }
                     }
-                    if (sold)
+                    if (sold) {
                         flats.Add(flat);
+                    }
                 }
             }
             return flats;

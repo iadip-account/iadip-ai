@@ -5,6 +5,6 @@ using System.Text;
 
 namespace IADIP {
     interface INormalize {
-        void normalize(List<Flat> flats);
+        List<Flat> normalize(List<Flat> flats);
     }
 }

@@ -8,7 +8,7 @@ namespace IADIP {
         const int A = 0;
         const int B = 1;
 
-        public void normalize(List<Flat> flats) {
+        public List<Flat> normalize(List<Flat> flats) {
             double minSpace = flats.Min(q => q.Space);
             double maxSpace = flats.Max(q => q.Space);
             double minBathes = flats.Min(q => q.Baths);
@@ -20,12 +20,18 @@ namespace IADIP {
 
             save (minSpace, maxSpace, minBathes, maxBathes, minBeech, maxBeech, minCost, maxCost);
 
+            List<Flat> flatsNormalize = new List<Flat>();
             foreach (Flat flat in flats) {
-                normalizeSpace(flat, minSpace, maxSpace);
-                normalizeBathes(flat, minBathes, maxBathes);
-                normalizeBeech(flat, minBeech, maxBeech);
-                normalizeCost(flat, minCost, maxCost);
+                Flat flatNormalize = new Flat(flat.Number,
+                normalizeSpace(flat, minSpace, maxSpace),
+                normalizeBathes(flat, minBathes, maxBathes),
+                normalizeBeech(flat, minBeech, maxBeech),
+                normalizeCost(flat, minCost, maxCost),
+                flat.City,
+                flat.Firm);
+                flatsNormalize.Add(flatNormalize);
             }
+            return flatsNormalize;
         }
 
         private void save
@@ -58,20 +64,20 @@ namespace IADIP {
             return (value - A) * (max - min) / (B - A) + min;
         }
 
-        private void normalizeSpace(Flat flat, double min, double max) {
-            flat.Space = displacement(flat.Space, min, max);
+        private double normalizeSpace(Flat flat, double min, double max) {
+            return displacement(flat.Space, min, max);
         }
 
-        private void normalizeBathes(Flat flat, double min, double max) {
-            flat.Baths = displacement(flat.Baths, min, max);
+        private double normalizeBathes(Flat flat, double min, double max) {
+            return displacement(flat.Baths, min, max);
         }
 
-        private void normalizeBeech(Flat flat, double min, double max) {
-            flat.Beech = displacement(flat.Beech, min, max);
+        private double normalizeBeech(Flat flat, double min, double max) {
+            return displacement(flat.Beech, min, max);
         }
 
-        private void normalizeCost(Flat flat, double min, double max) {
-            flat.Cost = displacement(flat.Cost, min, max);
+        private double normalizeCost(Flat flat, double min, double max) {
+            return displacement(flat.Cost, min, max);
         }
     }
 }
