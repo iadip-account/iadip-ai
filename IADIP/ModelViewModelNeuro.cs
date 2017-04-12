@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Forms;
 using System.Xml.Serialization;
@@ -43,6 +44,10 @@ namespace IADIP {
         private ICollectionView collectionSegments;
 
         private Segment segment;
+
+        private int[] layersMas;
+
+        private NeuralNW NET;
 
         public List<Segment> Segments {
             get {
@@ -195,7 +200,100 @@ namespace IADIP {
             string[] pathes = System.IO.Directory.GetFiles(Path);
             ExcelReader er = new ExcelReader(pathes);
             Flats = er.getAll();
+            Flats.Sort(new FlatComparer());
             CollectionFlats = CollectionViewSource.GetDefaultView(Flats);
+        }
+
+        private bool parseLayers() {
+            if (Layers != null) {
+                string[] temp = Layers.Split(',');
+                layersMas = new int[temp.Length + 1];
+                int a = 0;
+                for (int i = 0; i < temp.Length; i++) {
+                    if (Int32.TryParse(temp[i].Trim(), out a)) {
+                        layersMas[i] = a;
+                    } else {
+                        return false;
+                    }
+                }
+            } else {
+                layersMas = new int[1];
+            }
+            layersMas[layersMas.Length - 1] = 1;
+            return true;
+        }
+
+
+        private void Train(List<Flat> flats) {
+            double kErr = 1E256;
+            int k = 0;
+            double kLern = Speed;
+
+            double[] X = new double[3];
+            double[] Y = new double[1];
+
+            while (k < Maximum && kErr > Goal) {
+                kErr = 0;
+
+                foreach (Flat flat in flats) {
+                    X[0] = flat.Space;
+                    X[0] = flat.Baths;
+                    X[0] = flat.Beech;
+                    Y[0] = flat.Cost;
+                    kErr += NET.LernNW(X, Y, kLern);
+                }
+                Training = "Выполнена " + (k + 1).ToString() + " итерация обучения (Текущая ошибка: " + Convert.ToString(kErr) + ")";
+
+                k++;
+            }
+        }
+
+        private void Testing(List<Flat> flats) {
+            double sum = 0;
+            double[] Y = new double[1];
+            double[] X = new double[3];
+
+            foreach (Flat flat in flats) {
+                X[0] = flat.Space;
+                X[0] = flat.Baths;
+                X[0] = flat.Beech;
+                NET.NetOUT(X, out Y);
+                sum += Math.Abs(flat.Cost - Y[0]) / flat.Cost;
+            }
+            Error = sum / flats.Count * 100;
+        }
+
+        public async Task Train() {
+            if (!parseLayers()) {
+                System.Windows.MessageBox.Show("Неверный ввод скрытых слоев");
+                return;
+            }
+            if (Segment != null) {
+                if (Segments.Where(q => q.Name == Segment.Name).ToList().Count > 1) {
+                    System.Windows.MessageBox.Show("Названия сегментов не должны повторяться!");
+                    return;
+                }
+                NET = new NeuralNW(3, layersMas);
+
+                List<Flat> list = Flats.Where(q => q.Cost <= Segment.To && q.Cost >= Segment.From).ToList();
+
+                INormalize norm = new NormalizeByDisplacement();
+                flatsNormalize = norm.normalize(list);
+
+                int test = (int)(flatsNormalize.Count * Tests / 100);
+                Random rnd = new Random();
+                int ind = rnd.Next(flatsNormalize.Count - test);
+                List<Flat> testList = flatsNormalize.GetRange(ind, test);
+                List<Flat> trainList = flatsNormalize.GetRange(0, ind)
+                    .Concat(flatsNormalize.GetRange(ind + test, flatsNormalize.Count - ind - test))
+                    .ToList();
+                await Task.Run(() => Train(trainList));
+                Testing(testList);
+                NET.SaveNW(Segment.Name + ".nw");
+            } else {
+                System.Windows.MessageBox.Show("Выберите сегмент!");
+                return;
+            }
         }
     }
 }

@@ -38,12 +38,12 @@ namespace IADIP {
                 double[] Y = new double[1];
                 double[] X = new double[3];
 
-                X[0] = NormalizeByDisplacement.displacement(mvm.Area, Properties.Settings.Default.minSpace, Properties.Settings.Default.maxSpace);
-                X[0] = NormalizeByDisplacement.displacement(mvm.Bathes, Properties.Settings.Default.minBaths, Properties.Settings.Default.maxSpace);
-                X[0] = NormalizeByDisplacement.displacement(mvm.Beech, Properties.Settings.Default.minBeech, Properties.Settings.Default.maxBeech);
+                X[0] = NormalizeByDisplacement.displacement(mvm.Area,  Properties.Settings.Default.maxSpace);
+                X[0] = NormalizeByDisplacement.displacement(mvm.Bathes, Properties.Settings.Default.maxSpace);
+                X[0] = NormalizeByDisplacement.displacement(mvm.Beech, Properties.Settings.Default.maxBeech);
                 NET.NetOUT(X, out Y);
 
-                mvm.Cost = NormalizeByDisplacement.deDisplacement(Y[0], Properties.Settings.Default.minCost, Properties.Settings.Default.maxCost);
+                mvm.Cost = NormalizeByDisplacement.deDisplacement(Y[0], Properties.Settings.Default.maxCost);
             } else {
                 MessageBox.Show("Выберите сегмент");
             }

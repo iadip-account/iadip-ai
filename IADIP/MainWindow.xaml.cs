@@ -20,13 +20,21 @@ namespace IADIP {
         }
 
         private void Button_Click(object sender, RoutedEventArgs e) {
-            NeuroWindow nw = new NeuroWindow();
-            nw.ShowDialog();
+            try {
+                NeuroWindow nw = new NeuroWindow();
+                nw.ShowDialog();
+            } catch (Exception ex) {
+                MessageBox.Show(ex.Message + Environment.NewLine + ex.StackTrace);
+            }
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e) {
-            CostWindow cw = new CostWindow();
-            cw.ShowDialog();
+            try {
+                CostWindow cw = new CostWindow();
+                cw.ShowDialog();
+            } catch (Exception ex) {
+                MessageBox.Show(ex.Message + Environment.NewLine + ex.StackTrace);
+            }
         }
     }
 }

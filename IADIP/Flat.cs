@@ -23,6 +23,18 @@ namespace IADIP {
             this.City = City;
             this.Firm = Firm;
         }
+
+    }
+
+    public class FlatComparer : IComparer<Flat> {
+        public int Compare(Flat p1, Flat p2) {
+            if (p1.Number > p2.Number)
+                return 1;
+            else if (p1.Number < p2.Number)
+                return -1;
+            else
+                return 0;
+        }
     }
 
     public class FlatList {
