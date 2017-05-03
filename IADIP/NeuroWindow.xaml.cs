@@ -51,8 +51,6 @@ namespace IADIP {
             }
         }
 
-
-
         private void Button_Click_1(object sender, RoutedEventArgs e) {
             mvm.Segments.Add(new Segment());
             mvm.CollectionSegments.Refresh();

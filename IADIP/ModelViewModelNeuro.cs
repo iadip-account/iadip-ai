@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -21,6 +22,12 @@ namespace IADIP {
             XmlSerializer serialize = new XmlSerializer(typeof(List<Segment>));
             Segments = (List<Segment>)serialize.Deserialize(new StreamReader("segments.xml"));
             CollectionSegments = CollectionViewSource.GetDefaultView(Segments);
+
+            Speed = 0.1;
+            Layers = "50,50";
+            Maximum = 100000;
+            Goal = 0.05;
+            Tests = 40;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -33,6 +40,7 @@ namespace IADIP {
         private double tests;
         private string training;
         private double error;
+        private double errorTest;
         private double goal;
 
         private List<Flat> flats;
@@ -159,6 +167,16 @@ namespace IADIP {
             }
         }
 
+        public double ErrorTest {
+            get {
+                return errorTest;
+            }
+            set {
+                errorTest = value;
+                NeuroPropertyChanged("ErrorTest");
+            }
+        }
+
         public double Goal {
             get {
                 return goal;
@@ -248,19 +266,25 @@ namespace IADIP {
             }
         }
 
-        private void Testing(List<Flat> flats) {
+        public DataSet dataSet;
+
+        private double Testing(List<Flat> flats) {
             double sum = 0;
             double[] Y = new double[1];
             double[] X = new double[3];
-
+            dataSet = new DataSet();
             foreach (Flat flat in flats) {
                 X[0] = flat.Space;
                 X[0] = flat.Baths;
                 X[0] = flat.Beech;
                 NET.NetOUT(X, out Y);
+                DataSet.DataRow row = dataSet.Data.NewDataRow();
+                row.Fact = Math.Pow(flat.Cost, 4);
+                row.Exec = Math.Pow(Y[0], 4);
+                dataSet.Data.Rows.Add(row);
                 sum += Math.Abs(flat.Cost - Y[0]) / flat.Cost;
             }
-            Error = sum / flats.Count * 100;
+            return sum / flats.Count * 100;
         }
 
         public async Task Train() {
@@ -288,12 +312,28 @@ namespace IADIP {
                     .Concat(flatsNormalize.GetRange(ind + test, flatsNormalize.Count - ind - test))
                     .ToList();
                 await Task.Run(() => Train(trainList));
-                Testing(testList);
+                Error = Testing(trainList);
+                FormingReport(dataSet.Data, "DataSet1", "Report1.rdlc", "Результат на обучающей выборке");
+                ErrorTest = Testing(testList);
+                FormingReport(dataSet.Data, "DataSet1", "Report1.rdlc", "Результат на тестовой выборке");
                 NET.SaveNW(Segment.Name + ".nw");
             } else {
                 System.Windows.MessageBox.Show("Выберите сегмент!");
                 return;
             }
+        }
+
+        private void FormingReport(DataTable table, string nameDataSource, string nameReport, string winName) {
+            Microsoft.Reporting.WinForms.ReportDataSource reportDataSource1 =
+                            new Microsoft.Reporting.WinForms.ReportDataSource();
+            reportDataSource1.Name = nameDataSource;
+            reportDataSource1.Value = table;
+            WindowReport r = new WindowReport();
+            r.Title = winName;
+            r.reportViewer.LocalReport.DataSources.Add(reportDataSource1);
+            r.reportViewer.LocalReport.ReportPath = nameReport;
+            r.reportViewer.RefreshReport();
+            r.Show();
         }
     }
 }
